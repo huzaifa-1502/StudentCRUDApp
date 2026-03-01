@@ -1,20 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
-// Add this near the top, after builder is created
+
+// Add DbContext for SQL Server
 builder.Services.AddDbContext<StudentCRUDApp.Data.AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add services to the container.
+// Add Razor Pages services
 builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure middleware
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -24,8 +24,14 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+// Map Razor Pages and static assets
 app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 
+// --- RENDER-SPECIFIC PORT HANDLING ---
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+app.Urls.Add($"http://*:{port}");
+
+// Run the app
 app.Run();
